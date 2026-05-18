@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-body: var(--font-geist), system-ui, sans-serif;
+  --font-mono-sg: var(--font-space-mono), monospace;
+}
+
+body {
+  font-family: var(--font-geist), system-ui, sans-serif;
+}
+.font-space-grotesk {
+  font-family: var(--font-space-grotesk), sans-serif !important;
+}
+.font-geist {
+  font-family: var(--font-geist), sans-serif !important;
+}
+.font-mono {
+  font-family: var(--font-space-mono), monospace;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Card sizing — larger for TV viewing */
+.slide-container {
+  aspect-ratio: 3/4;
+  min-width: 0;
+  will-change: transform, opacity;
+  contain: layout paint;
+  backface-visibility: hidden;
+}
+
+/* Background grid */
+.bg-grid-pattern {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(255, 255, 255, 0.1) 1px,
+    transparent 0
+  );
+  background-size: 24px 24px;
+}
+
+/* ============= SITE SCROLL ANIMATION ============= */
+.site-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.site-bg-inner {
+  --card-w: min(85vw, 460px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(var(--card-w) * 3500 / 1440);
+  background-size: 100% auto;
+  background-position: top center;
+  background-repeat: no-repeat;
+}
+.site-bg-inner iframe {
+  width: 1440px;
+  height: 3500px;
+  border: 0;
+  transform-origin: top left;
+  transform: scale(calc(var(--card-w) / 1440px));
+  pointer-events: none;
+}
+@media (min-width: 768px) {
+  .site-bg-inner {
+    --card-w: 640px;
+  }
+}
+
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 10, 0.4) 0%,
+    rgba(10, 10, 10, 0.1) 30%,
+    rgba(10, 10, 10, 0.5) 60%,
+    rgba(10, 10, 10, 0.95) 100%
+  );
+  pointer-events: none;
+}
+
+@keyframes animationIn {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+.animate-on-scroll {
+  animation-play-state: paused !important;
+}
+.animate-on-scroll.animate {
+  animation-play-state: running !important;
+}
+
+.progress-bar {
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+/* QR code styling */
+.qr-grid {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  width: 100%;
+  aspect-ratio: 1;
+  background: #000;
+}
+.qr-grid div {
+  background: #000;
+}
+.qr-grid div.white {
+  background: #fff;
+}
+
+/* ============= RESPONSIVE LAYOUT ============= */
+.slide-container {
+  width: min(85vw, 460px);
+  height: calc(100vh - 160px);
+}
+#slider {
+  padding-inline: calc(50vw - min(42.5vw, 230px));
+}
+@media (min-width: 768px) {
+  .slide-container {
+    width: 640px;
+    height: calc(100vh - 290px);
+  }
+  #slider {
+    padding-inline: calc(50vw - 320px);
+  }
+}

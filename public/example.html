@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alex Chen — Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap"
+    />
+    <style>
+      body {
+        font-family: "Inter", system-ui, sans-serif;
+      }
+      .font-serif {
+        font-family: "Instrument Serif", serif;
+      }
+      .grain {
+        background-image: radial-gradient(
+          circle at 1px 1px,
+          rgba(0, 0, 0, 0.08) 1px,
+          transparent 0
+        );
+        background-size: 4px 4px;
+      }
+    </style>
+  </head>
+  <body class="bg-[#f6f5f2] text-[#0a0a0a] antialiased">
+    <!-- ===== NAV ===== -->
+    <header class="px-8 md:px-16 py-6 flex items-center justify-between">
+      <a href="#" class="tracking-[0.25em] font-semibold text-sm">ALEX CHEN</a>
+      <nav class="hidden md:flex items-center gap-10 text-sm">
+        <a href="#work" class="hover:opacity-60 transition">Work</a>
+        <a href="#about" class="hover:opacity-60 transition">About</a>
+        <a href="#contact" class="hover:opacity-60 transition">Contact</a>
+      </nav>
+      <a
+        href="#contact"
+        class="text-xs px-4 py-2 border border-black/20 rounded-full hover:bg-black hover:text-white transition"
+        >Get in touch</a
+      >
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="px-8 md:px-16 pt-20 pb-32 max-w-7xl mx-auto">
+      <p class="text-xs uppercase tracking-[0.3em] text-neutral-500 mb-8">
+        Y10 · Portfolio 2026
+      </p>
+      <h1
+        class="font-serif text-6xl md:text-8xl leading-[0.95] tracking-tight max-w-5xl"
+      >
+        Design, code, and the
+        <em class="italic text-neutral-500">small</em> details that make
+        software feel alive.
+      </h1>
+      <div class="mt-16 flex flex-col md:flex-row gap-8 md:gap-16">
+        <p class="max-w-md text-neutral-600 leading-relaxed">
+          I'm a year-10 student exploring the intersection of design and code.
+          I build interfaces with care for typography, motion, and the feel of
+          interaction.
+        </p>
+        <div class="flex gap-3 items-start">
+          <a
+            href="#work"
+            class="px-6 py-3 bg-black text-white text-sm rounded-full hover:bg-neutral-800 transition"
+            >View work →</a
+          >
+          <a
+            href="#about"
+            class="px-6 py-3 border border-black/20 text-sm rounded-full hover:bg-black/5 transition"
+            >About me</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FEATURED PROJECT ===== -->
+    <section class="px-8 md:px-16 pb-32">
+      <div
+        class="aspect-[16/9] bg-gradient-to-br from-orange-200 via-rose-100 to-amber-50 rounded-3xl flex items-center justify-center relative overflow-hidden grain"
+      >
+        <div class="absolute top-8 left-8 text-xs tracking-[0.3em] uppercase">
+          Featured
+        </div>
+        <div class="absolute bottom-8 left-8">
+          <p class="font-serif text-4xl md:text-5xl">Aurora Weather</p>
+          <p class="text-sm text-neutral-700 mt-1">
+            Real-time forecasts, beautifully animated
+          </p>
+        </div>
+        <div
+          class="absolute bottom-8 right-8 text-xs px-3 py-1.5 bg-black text-white rounded-full"
+        >
+          2026
+        </div>
+        <div
+          class="w-48 h-48 rounded-full bg-gradient-to-br from-orange-400 to-rose-400 blur-2xl opacity-60"
+        ></div>
+      </div>
+    </section>
+
+    <!-- ===== WORK GRID ===== -->
+    <section id="work" class="px-8 md:px-16 pb-32 max-w-7xl mx-auto">
+      <div class="flex items-end justify-between mb-12">
+        <h2 class="font-serif text-5xl md:text-6xl">Selected work</h2>
+        <span class="text-xs tracking-[0.3em] uppercase text-neutral-500"
+          >2024 — 2026</span
+        >
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a href="#" class="group">
+          <div
+            class="aspect-[4/3] bg-neutral-900 rounded-2xl overflow-hidden relative"
+          >
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-emerald-500/40 to-cyan-500/20"
+            ></div>
+            <div class="absolute bottom-6 left-6 text-white">
+              <p class="font-serif text-2xl">Notes — minimal</p>
+              <p class="text-xs text-white/70 mt-1">
+                Markdown-first writing app
+              </p>
+            </div>
+          </div>
+        </a>
+        <a href="#" class="group">
+          <div
+            class="aspect-[4/3] bg-neutral-100 rounded-2xl overflow-hidden relative grain"
+          >
+            <div class="absolute bottom-6 left-6">
+              <p class="font-serif text-2xl">Pulse</p>
+              <p class="text-xs text-neutral-600 mt-1">Habit-tracking PWA</p>
+            </div>
+          </div>
+        </a>
+        <a href="#" class="group">
+          <div
+            class="aspect-[4/3] bg-gradient-to-br from-violet-200 to-pink-100 rounded-2xl overflow-hidden relative"
+          >
+            <div class="absolute bottom-6 left-6">
+              <p class="font-serif text-2xl">Studio Index</p>
+              <p class="text-xs text-neutral-700 mt-1">
+                Directory of design studios
+              </p>
+            </div>
+          </div>
+        </a>
+        <a href="#" class="group">
+          <div
+            class="aspect-[4/3] bg-[#0a0a0a] rounded-2xl overflow-hidden relative"
+          >
+            <div class="absolute bottom-6 left-6 text-white">
+              <p class="font-serif text-2xl">Halo</p>
+              <p class="text-xs text-white/70 mt-1">Music player concept</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ===== ABOUT ===== -->
+    <section id="about" class="px-8 md:px-16 pb-32 max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+        <div class="md:col-span-4">
+          <p class="text-xs uppercase tracking-[0.3em] text-neutral-500">
+            About
+          </p>
+        </div>
+        <div class="md:col-span-8">
+          <p class="font-serif text-3xl md:text-4xl leading-[1.15]">
+            I started building websites when I was 12 — a fan page for a band
+            nobody else liked. Eight years later, I'm still chasing that same
+            feeling: making something exist on the internet that didn't before.
+          </p>
+          <div class="mt-12 grid grid-cols-2 md:grid-cols-3 gap-8 text-sm">
+            <div>
+              <p class="text-neutral-500 text-xs uppercase tracking-wider mb-2">
+                Stack
+              </p>
+              <p>React, Next.js, TypeScript, Tailwind, GSAP</p>
+            </div>
+            <div>
+              <p class="text-neutral-500 text-xs uppercase tracking-wider mb-2">
+                Tools
+              </p>
+              <p>Figma, VS Code, Linear, Framer</p>
+            </div>
+            <div>
+              <p class="text-neutral-500 text-xs uppercase tracking-wider mb-2">
+                Currently
+              </p>
+              <p>Y10 at Oyunlag · Building Aurora Weather</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section id="contact" class="px-8 md:px-16 pb-32 max-w-7xl mx-auto">
+      <div class="border-t border-black/10 pt-16">
+        <p class="text-xs uppercase tracking-[0.3em] text-neutral-500 mb-6">
+          Get in touch
+        </p>
+        <h2 class="font-serif text-6xl md:text-8xl leading-[0.95]">
+          Let's make<br /><em class="italic text-neutral-500">something</em>.
+        </h2>
+        <div class="mt-12 flex flex-col md:flex-row gap-4 md:items-center">
+          <a
+            href="mailto:hello@alexchen.dev"
+            class="px-6 py-4 bg-black text-white rounded-full text-sm hover:bg-neutral-800 transition"
+            >hello@alexchen.dev →</a
+          >
+          <div class="flex gap-6 text-sm md:ml-6">
+            <a href="#" class="hover:opacity-60 transition">GitHub</a>
+            <a href="#" class="hover:opacity-60 transition">Read.cv</a>
+            <a href="#" class="hover:opacity-60 transition">Twitter</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer
+      class="px-8 md:px-16 py-8 flex items-center justify-between text-xs text-neutral-500"
+    >
+      <span>© 2026 Alex Chen</span>
+      <span class="tracking-[0.3em] uppercase">Built with care</span>
+    </footer>
+  </body>
+</html>

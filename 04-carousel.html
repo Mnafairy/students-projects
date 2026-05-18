@@ -1,0 +1,1131 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo Day '26 — Carousel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Flip.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Geist:wght@300;400;500;600;700&display=swap"
+    />
+    <style>
+      :root {
+        --font-display: "Space Grotesk", system-ui, sans-serif;
+        --font-body: "Geist", system-ui, sans-serif;
+        --font-mono: "Space Mono", monospace;
+      }
+      body {
+        font-family: var(--font-body);
+      }
+      .font-space-grotesk {
+        font-family: "Space Grotesk", sans-serif !important;
+      }
+      .font-geist {
+        font-family: "Geist", sans-serif !important;
+      }
+      .font-mono {
+        font-family: "Space Mono", monospace;
+      }
+
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      /* Card sizing — larger for TV viewing */
+      .slide-container {
+        aspect-ratio: 3/4;
+        min-width: 0;
+        will-change: transform, opacity;
+        contain: layout paint;
+        backface-visibility: hidden;
+      }
+
+      /* Background grid */
+      .bg-grid-pattern {
+        background-image: radial-gradient(
+          circle at 1px 1px,
+          rgba(255, 255, 255, 0.1) 1px,
+          transparent 0
+        );
+        background-size: 24px 24px;
+      }
+
+      /* ============= SITE SCROLL ANIMATION ============= */
+      /* The student website screenshot scrolls slowly inside its card */
+      .site-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      /* Force desktop rendering of preview, then scale to fit card width.
+         Scale = cardWidth / 1440 (iframe's intrinsic render width). */
+      .site-bg-inner {
+        --card-w: min(85vw, 460px);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: calc(var(--card-w) * 3500 / 1440);
+        background-size: 100% auto;
+        background-position: top center;
+        background-repeat: no-repeat;
+      }
+      .site-bg-inner iframe {
+        width: 1440px;
+        height: 3500px;
+        border: 0;
+        transform-origin: top left;
+        transform: scale(calc(var(--card-w) / 1440px));
+        pointer-events: none;
+      }
+      @media (min-width: 768px) {
+        .site-bg-inner {
+          --card-w: 640px;
+        }
+      }
+
+      /* Card content overlay gradient */
+      .card-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(10, 10, 10, 0.4) 0%,
+          rgba(10, 10, 10, 0.1) 30%,
+          rgba(10, 10, 10, 0.5) 60%,
+          rgba(10, 10, 10, 0.95) 100%
+        );
+        pointer-events: none;
+      }
+
+      /* Animation intro */
+      @keyframes animationIn {
+        0% {
+          opacity: 0;
+          transform: translateY(30px);
+          filter: blur(8px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+          filter: blur(0px);
+        }
+      }
+      .animate-on-scroll {
+        animation-play-state: paused !important;
+      }
+      .animate-on-scroll.animate {
+        animation-play-state: running !important;
+      }
+
+      .progress-bar {
+        transform-origin: left;
+        transform: scaleX(0);
+      }
+
+      /* QR code styling */
+      .qr-grid {
+        display: grid;
+        grid-template-columns: repeat(15, 1fr);
+        width: 100%;
+        aspect-ratio: 1;
+        background: #000;
+      }
+      .qr-grid div {
+        background: #000;
+      }
+      .qr-grid div.white {
+        background: #fff;
+      }
+
+      /* ============= RESPONSIVE LAYOUT ============= */
+      .slide-container {
+        width: min(85vw, 460px);
+        height: calc(100vh - 90px);
+      }
+      #slider {
+        padding-inline: calc(50vw - min(42.5vw, 230px));
+      }
+      @media (min-width: 768px) {
+        .slide-container {
+          width: 640px;
+          height: calc(100vh - 110px);
+        }
+        #slider {
+          padding-inline: calc(50vw - 320px);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen flex flex-col items-center justify-center antialiased selection:bg-orange-500/30 text-white bg-black overflow-hidden"
+  >
+    <!-- ============= FLOATING TOP-LEFT HEADER ============= -->
+    <div
+      class="fixed top-0 left-0 z-50 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4"
+    >
+      <img src="logo 1.svg" alt="Oyunlag" class="h-9 sm:h-12 w-auto" />
+      <span
+        class="hidden sm:inline font-display text-lg font-semibold tracking-tight text-white font-geist"
+        >Oyunlag Demo Day '26</span
+      >
+    </div>
+
+    <!-- ============= FLOATING TOP-RIGHT SEARCH ============= -->
+    <div
+      class="fixed top-0 right-0 z-50 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4"
+    >
+      <div class="relative w-44 sm:w-64">
+        <input
+          id="search-input"
+          type="text"
+          inputmode="search"
+          placeholder="Search name, ID, or scan…"
+          autocomplete="off"
+          spellcheck="false"
+          class="w-full bg-black/60 backdrop-blur-md border border-white/10 rounded-full pl-9 pr-3 py-2 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-orange-500/50 focus:bg-white/10 transition font-mono"
+        />
+        <svg
+          class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <line x1="20" y1="20" x2="16.65" y2="16.65" />
+        </svg>
+      </div>
+      <div
+        id="scan-status"
+        class="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-neutral-500 uppercase tracking-widest"
+      >
+        <span
+          id="scan-dot"
+          class="w-1.5 h-1.5 rounded-full bg-neutral-600"
+        ></span>
+        <span>RFID</span>
+      </div>
+    </div>
+
+<!-- Scan toast -->
+    <div
+      id="toast"
+      class="fixed top-16 sm:top-20 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-full backdrop-blur-md bg-black/85 border border-white/10 text-sm font-mono tracking-wider shadow-2xl pointer-events-none opacity-0"
+    >
+      <span id="toast-text"></span>
+    </div>
+
+    <!-- ============= CAROUSEL ============= -->
+    <main
+      id="slider"
+      class="flex flex-row overflow-x-hidden hide-scrollbar w-full pt-14 sm:pt-16 pb-4 sm:pb-8 gap-x-4 md:gap-x-12"
+      style="
+        mask-image: linear-gradient(
+          90deg,
+          transparent,
+          black 8%,
+          black 92%,
+          transparent
+        );
+        -webkit-mask-image: linear-gradient(
+          90deg,
+          transparent,
+          black 8%,
+          black 92%,
+          transparent
+        );
+        height: 100vh;
+        perspective: 2000px;
+        transform-style: preserve-3d;
+      "
+    ></main>
+
+    <!-- ============= BOTTOM BAR ============= -->
+    <div
+      class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-6 py-2 sm:py-3 bg-black/80 backdrop-blur-md border-t border-white/10 h-10 sm:h-14"
+    >
+      <div
+        class="font-mono text-[9px] sm:text-[10px] text-neutral-500 uppercase tracking-widest truncate"
+      >
+        <span class="text-orange-500 font-bold">●</span>
+        <span class="hidden sm:inline"
+          >Scan any QR code to explore the project</span
+        >
+        <span class="sm:hidden">Scan to explore</span>
+      </div>
+      <div
+        class="hidden sm:flex gap-6 font-mono text-[10px] text-neutral-500 uppercase tracking-widest"
+      >
+        <span><span class="text-white font-bold">300</span> projects</span>
+        <span><span class="text-white font-bold">24</span> classes</span>
+        <span><span class="text-white font-bold">15</span> stacks</span>
+      </div>
+    </div>
+
+    <script>
+      // ============= PLACEHOLDER STUDENT DATA =============
+      const firstNames = [
+        "Maya",
+        "James",
+        "Priya",
+        "Tengis",
+        "Aya",
+        "Dava",
+        "Sara",
+        "Bat",
+        "Lucas",
+        "Nomin",
+        "Liam",
+        "Saya",
+        "Erdene",
+        "Ari",
+        "Khulan",
+        "Sam",
+        "Oyun",
+        "Nick",
+        "Tuya",
+        "Alex",
+        "Bilguun",
+        "Mia",
+        "Ganbold",
+        "Zoe",
+        "Munkh",
+      ];
+      const lastNames = [
+        "Rodriguez",
+        "Khan",
+        "Sharma",
+        "Batbayar",
+        "Mori",
+        "Otgonbat",
+        "Lopez",
+        "Amarsanaa",
+        "Tanaka",
+        "Naranbat",
+        "Davis",
+        "Sukhbaatar",
+        "Erdenebat",
+        "Chen",
+        "Khurelbaatar",
+        "Park",
+        "Oyunbat",
+        "Johnson",
+        "Tuyaa",
+        "Anderson",
+      ];
+      const projects = [
+        [
+          "Personal Portfolio",
+          "React",
+          "A responsive portfolio site featuring smooth scroll animations, dark mode, and a custom CMS for blog posts.",
+        ],
+        [
+          "Weather Dashboard",
+          "JavaScript",
+          "Real-time weather app using OpenWeather API with location search, 7-day forecasts, and animated icons.",
+        ],
+        [
+          "Recipe Finder",
+          "Next.js",
+          "Search 10,000+ recipes by ingredient with Tailwind and a custom Spoonacular integration.",
+        ],
+        [
+          "Todo App Pro",
+          "Vue",
+          "Drag-and-drop task manager with categories, due dates, and persistent local storage.",
+        ],
+        [
+          "Music Player",
+          "Svelte",
+          "Web-based music player with playlists, audio visualizer, and keyboard shortcuts.",
+        ],
+        [
+          "Fitness Tracker",
+          "React Native",
+          "Track workouts, calories, and progress charts. Built mobile-first with offline support.",
+        ],
+        [
+          "Blog Platform",
+          "Astro",
+          "Static-generated blog with markdown support, RSS feeds, and automatic dark mode.",
+        ],
+        [
+          "Quiz Game",
+          "Vanilla JS",
+          "Interactive quiz game with timer, scoreboard, and 500+ questions across 12 categories.",
+        ],
+        [
+          "Photography Site",
+          "HTML/CSS",
+          "Minimal gallery site showcasing landscape photography with lightbox previews.",
+        ],
+        [
+          "Pomodoro Timer",
+          "React",
+          "Focus timer with task lists, productivity statistics, and ambient sounds.",
+        ],
+        [
+          "Chat Application",
+          "Node.js",
+          "Real-time chat with Socket.io, multiple rooms, file sharing, and emoji reactions.",
+        ],
+        [
+          "E-commerce Demo",
+          "Next.js",
+          "Full shopping cart with Stripe checkout, product filters, and admin panel.",
+        ],
+      ];
+      const colors = [
+        "#2d4a5c",
+        "#5a3d3d",
+        "#3d5a4a",
+        "#5a4a3d",
+        "#4a3d5a",
+        "#3d5a5a",
+        "#5a3d5a",
+        "#3d3d5a",
+        "#5a5a3d",
+        "#4a5a3d",
+        "#1a4a3d",
+        "#4a3d1a",
+        "#3d1a4a",
+        "#1a3d4a",
+        "#4a1a3d",
+        "#6b4a3d",
+        "#3d6b4a",
+        "#4a3d6b",
+        "#6b3d4a",
+        "#3d4a6b",
+      ];
+
+      // Students are loaded from grade8to11_students_prod.json at boot.
+      // Real fields: { id, name, grade, cardId }.
+      // Project fields are demo placeholders until real project data exists.
+      let TOTAL_STUDENTS = 0;
+      let students = [];
+      const cardIdToIndex = new Map();
+      const studentIdToIndex = new Map();
+
+      async function loadStudents() {
+        let raw;
+        try {
+          const res = await fetch("grade8to11_students_prod.json");
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          raw = await res.json();
+        } catch (err) {
+          console.error("Failed to load student data:", err);
+          document.body.insertAdjacentHTML(
+            "afterbegin",
+            `<div style="position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:200;background:#7f1d1d;color:#fff;padding:14px 22px;border-radius:12px;font-family:monospace;font-size:13px;max-width:540px;text-align:center;">
+              Could not load <b>grade8to11_students_prod.json</b>. Serve this folder over HTTP (e.g. <code>python3 -m http.server</code>) instead of opening via file://.
+            </div>`,
+          );
+          raw = [];
+        }
+
+        students = raw.map((s, i) => {
+          const parts = (s.name || "").trim().split(/\s+/);
+          const firstName = parts[0] || s.name || "Student";
+          const lastName = parts.slice(1).join(" ");
+          const proj = projects[i % projects.length];
+          return {
+            id: s.id,
+            studentId: s.studentId,
+            cardId: s.cardId,
+            slideNum: String(i + 1).padStart(3, "0"),
+            totalSlides: String(raw.length).padStart(3, "0"),
+            name: s.name,
+            firstName,
+            lastName,
+            project: proj[0],
+            stack: proj[1],
+            desc: proj[2],
+            year: String(s.grade),
+            color: colors[i % colors.length],
+          };
+        });
+        TOTAL_STUDENTS = students.length;
+
+        cardIdToIndex.clear();
+        studentIdToIndex.clear();
+        students.forEach((s, i) => {
+          if (s.cardId) cardIdToIndex.set(String(s.cardId).trim(), i);
+          if (s.studentId) studentIdToIndex.set(String(s.studentId).trim().toLowerCase(), i);
+        });
+      }
+
+      // ============= PREVIEW GENERATION =============
+      function lightenColor(hex, percent) {
+        const num = parseInt(hex.slice(1), 16);
+        const r = Math.min(255, (num >> 16) + percent * 2.5);
+        const g = Math.min(255, ((num >> 8) & 0xff) + percent * 2.5);
+        const b = Math.min(255, (num & 0xff) + percent * 2.5);
+        return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+      }
+      function darkenColor(hex, percent) {
+        const num = parseInt(hex.slice(1), 16);
+        const r = Math.max(0, (num >> 16) - percent * 2.5);
+        const g = Math.max(0, ((num >> 8) & 0xff) - percent * 2.5);
+        const b = Math.max(0, (num & 0xff) - percent * 2.5);
+        return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+      }
+
+      // Generate a tall fake "full webpage" screenshot. Real screenshots will replace this.
+      function generateTallSitePreview(student) {
+        const c = student.color;
+        const accent = lightenColor(c, 30);
+        const darker = darkenColor(c, 20);
+        // Tall image — simulating a real long webpage with multiple sections
+        const svg = `
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 2240' preserveAspectRatio='xMinYMin slice'>
+          <!-- Background -->
+          <rect width='800' height='2240' fill='${c}'/>
+
+          <!-- Browser chrome -->
+          <rect x='0' y='0' width='800' height='48' fill='${darker}'/>
+          <circle cx='20' cy='24' r='6' fill='#ff5f57'/>
+          <circle cx='40' cy='24' r='6' fill='#ffbd2e'/>
+          <circle cx='60' cy='24' r='6' fill='#28c840'/>
+          <rect x='220' y='14' width='360' height='20' rx='10' fill='rgba(0,0,0,0.3)'/>
+          <text x='240' y='28' fill='${accent}' font-size='12' font-family='monospace' opacity='0.6'>${student.firstName.toLowerCase()}-portfolio.vercel.app</text>
+
+          <!-- Nav -->
+          <rect x='0' y='48' width='800' height='80' fill='${c}'/>
+          <text x='40' y='95' fill='${accent}' font-size='24' font-weight='800' font-family='sans-serif'>${student.firstName.toUpperCase()}</text>
+          <rect x='550' y='80' width='50' height='4' fill='${accent}' opacity='0.6'/>
+          <rect x='620' y='80' width='50' height='4' fill='${accent}' opacity='0.6'/>
+          <rect x='690' y='80' width='70' height='4' fill='${accent}' opacity='0.6'/>
+
+          <!-- HERO SECTION -->
+          <text x='40' y='320' fill='${accent}' font-size='72' font-weight='800' font-family='sans-serif'>${student.project}</text>
+          <text x='40' y='380' fill='${accent}' font-size='28' font-family='sans-serif' opacity='0.7'>by ${student.name}</text>
+          <rect x='40' y='420' width='400' height='8' fill='${accent}' rx='2' opacity='0.4'/>
+          <rect x='40' y='440' width='350' height='8' fill='${accent}' rx='2' opacity='0.4'/>
+          <rect x='40' y='460' width='280' height='8' fill='${accent}' rx='2' opacity='0.4'/>
+          <rect x='40' y='510' width='180' height='52' fill='${accent}' rx='6'/>
+          <text x='130' y='544' fill='${darker}' font-size='18' font-weight='700' font-family='sans-serif' text-anchor='middle'>View Project</text>
+
+          <!-- Hero illustration block -->
+          <rect x='480' y='200' width='280' height='280' fill='${darker}' rx='12'/>
+          <circle cx='620' cy='340' r='80' fill='${accent}' opacity='0.4'/>
+          <rect x='540' y='420' width='160' height='8' fill='${accent}' opacity='0.5' rx='2'/>
+
+          <!-- SECTION 2: ABOUT -->
+          <rect x='0' y='640' width='800' height='480' fill='${darker}'/>
+          <text x='40' y='720' fill='${accent}' font-size='14' font-weight='700' font-family='sans-serif' opacity='0.6'>ABOUT</text>
+          <text x='40' y='780' fill='${accent}' font-size='48' font-weight='800' font-family='sans-serif'>The Project</text>
+          <rect x='40' y='830' width='600' height='8' fill='${accent}' rx='2' opacity='0.3'/>
+          <rect x='40' y='850' width='560' height='8' fill='${accent}' rx='2' opacity='0.3'/>
+          <rect x='40' y='870' width='580' height='8' fill='${accent}' rx='2' opacity='0.3'/>
+          <rect x='40' y='890' width='480' height='8' fill='${accent}' rx='2' opacity='0.3'/>
+          <rect x='40' y='940' width='220' height='120' fill='${c}' rx='8' opacity='0.6'/>
+          <rect x='290' y='940' width='220' height='120' fill='${c}' rx='8' opacity='0.6'/>
+          <rect x='540' y='940' width='220' height='120' fill='${c}' rx='8' opacity='0.6'/>
+
+          <!-- SECTION 3: FEATURES -->
+          <rect x='0' y='1120' width='800' height='480' fill='${c}'/>
+          <text x='40' y='1200' fill='${accent}' font-size='14' font-weight='700' font-family='sans-serif' opacity='0.6'>FEATURES</text>
+          <text x='40' y='1260' fill='${accent}' font-size='48' font-weight='800' font-family='sans-serif'>What it does</text>
+          <rect x='40' y='1320' width='240' height='200' fill='${darker}' rx='10'/>
+          <rect x='60' y='1340' width='40' height='40' fill='${accent}' opacity='0.5' rx='6'/>
+          <rect x='60' y='1400' width='180' height='8' fill='${accent}' rx='2' opacity='0.5'/>
+          <rect x='60' y='1420' width='140' height='6' fill='${accent}' rx='2' opacity='0.3'/>
+          <rect x='300' y='1320' width='240' height='200' fill='${darker}' rx='10'/>
+          <rect x='320' y='1340' width='40' height='40' fill='${accent}' opacity='0.5' rx='6'/>
+          <rect x='320' y='1400' width='180' height='8' fill='${accent}' rx='2' opacity='0.5'/>
+          <rect x='320' y='1420' width='140' height='6' fill='${accent}' rx='2' opacity='0.3'/>
+          <rect x='560' y='1320' width='200' height='200' fill='${darker}' rx='10'/>
+          <rect x='580' y='1340' width='40' height='40' fill='${accent}' opacity='0.5' rx='6'/>
+          <rect x='580' y='1400' width='140' height='8' fill='${accent}' rx='2' opacity='0.5'/>
+
+          <!-- SECTION 4: GALLERY -->
+          <rect x='0' y='1600' width='800' height='480' fill='${darker}'/>
+          <text x='40' y='1680' fill='${accent}' font-size='14' font-weight='700' font-family='sans-serif' opacity='0.6'>SCREENSHOTS</text>
+          <rect x='40' y='1720' width='360' height='320' fill='${c}' rx='12' opacity='0.7'/>
+          <rect x='420' y='1720' width='340' height='150' fill='${c}' rx='12' opacity='0.7'/>
+          <rect x='420' y='1890' width='340' height='150' fill='${c}' rx='12' opacity='0.7'/>
+
+          <!-- FOOTER -->
+          <rect x='0' y='2080' width='800' height='160' fill='${c}'/>
+          <text x='40' y='2140' fill='${accent}' font-size='18' font-family='sans-serif' opacity='0.6'>© ${student.name}</text>
+          <rect x='40' y='2170' width='240' height='6' fill='${accent}' opacity='0.3' rx='2'/>
+          <text x='760' y='2140' fill='${accent}' font-size='12' font-family='monospace' text-anchor='end' opacity='0.5'>built with ${student.stack}</text>
+        </svg>`;
+        return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+      }
+
+      // ============= FAKE QR CODE =============
+      function generateQR(seed, container) {
+        container.innerHTML = "";
+        // seed may be a non-numeric UUID — hash it to a stable integer.
+        let seedNum = 0;
+        const str = String(seed || "");
+        for (let i = 0; i < str.length; i++) {
+          seedNum = (seedNum * 31 + str.charCodeAt(i)) | 0;
+        }
+        seedNum = Math.abs(seedNum);
+        for (let i = 0; i < 225; i++) {
+          const cell = document.createElement("div");
+          const row = Math.floor(i / 15);
+          const col = i % 15;
+          const inCorner =
+            (row < 3 && col < 3) ||
+            (row < 3 && col > 11) ||
+            (row > 11 && col < 3);
+          const cornerBorder =
+            (row === 0 || row === 2 || col === 0 || col === 2) &&
+            row < 3 &&
+            col < 3;
+          const cornerBorderTR =
+            (row === 0 || row === 2 || col === 12 || col === 14) &&
+            row < 3 &&
+            col > 11;
+          const cornerBorderBL =
+            (row === 12 || row === 14 || col === 0 || col === 2) &&
+            row > 11 &&
+            col < 3;
+          const cornerCenter =
+            (row === 1 && col === 1) ||
+            (row === 1 && col === 13) ||
+            (row === 13 && col === 1);
+          if (
+            cornerBorder ||
+            cornerBorderTR ||
+            cornerBorderBL ||
+            cornerCenter
+          ) {
+            // black
+          } else if (inCorner) {
+            cell.classList.add("white");
+          } else {
+            const hash = Math.abs(((seedNum * 31 + i * 7) ^ (i * i)) % 100);
+            if (hash > 48) cell.classList.add("white");
+          }
+          container.appendChild(cell);
+        }
+      }
+
+      // ============= BUILD CAROUSEL =============
+      // Only render a window of slides at a time for performance (10 around current)
+      const VISIBLE_WINDOW = 10;
+      const slider = document.getElementById("slider");
+      let currentIndex = 0;
+
+      function buildSlide(student, index) {
+        const section = document.createElement("section");
+        section.className =
+          "slide-container flex-shrink-0 flex flex-col overflow-hidden group bg-[#0A0A0A] border-white/10 border relative shadow-2xl rounded-2xl origin-center will-change-transform";
+        section.id = `slide-${index}`;
+        section.dataset.index = index;
+
+        section.innerHTML = `
+        <!-- Site screenshot background (scrolling) — live example.html preview -->
+        <div class="site-bg">
+          <div class="site-bg-inner">
+            <iframe
+              src="example.html"
+              loading="lazy"
+              scrolling="no"
+              tabindex="-1"
+            ></iframe>
+          </div>
+        </div>
+
+        <!-- Progress bar at top -->
+        <div class="absolute top-0 left-0 right-0 h-0.5 bg-white/10 z-30">
+          <div class="progress-bar h-full bg-orange-500" data-progress></div>
+        </div>
+
+        <!-- Top header overlay -->
+        <header class="absolute top-0 left-0 right-0 z-20 flex items-start justify-between p-4 sm:p-8">
+          <span class="font-mono text-[9px] sm:text-xs text-neutral-200 uppercase tracking-widest bg-black/45 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10" data-stagger>
+            [<span data-counter>${student.slideNum}</span>/${student.totalSlides}] // ${student.stack.toUpperCase()}
+          </span>
+        </header>
+
+        <!-- Bottom info panel -->
+        <div class="absolute bottom-0 left-0 right-0 z-20 h-[32%] sm:h-1/4 px-4 sm:px-6 py-3 sm:py-4 flex gap-3 sm:gap-4 items-stretch overflow-hidden" data-info-panel
+             style="background: linear-gradient(180deg, rgba(10,10,10,0) 0%, rgba(10,10,10,0.85) 18%, rgba(10,10,10,0.96) 50%, rgba(10,10,10,1) 100%);">
+
+          <!-- Left: text content -->
+          <div class="flex-1 min-w-0 flex flex-col justify-between">
+            <div class="min-h-0">
+              <!-- Project label -->
+              <div class="mb-0.5 sm:mb-1" data-stagger>
+                <span class="font-mono text-[9px] uppercase tracking-[0.3em] text-orange-500 font-bold">Now showing</span>
+              </div>
+
+              <!-- Student name -->
+              <h1 class="font-space-grotesk text-2xl sm:text-3xl md:text-4xl tracking-tighter leading-[0.95] font-semibold text-white break-words" data-name
+                  style="text-shadow: 0 1px 2px rgba(0,0,0,1), 0 4px 14px rgba(0,0,0,0.95), 0 10px 44px rgba(0,0,0,0.85), 0 0 32px rgba(249,115,22,0.45);">
+                ${student.firstName} <span class="text-white/80">${student.lastName}</span>
+              </h1>
+
+              <!-- Project title -->
+              <p class="font-space-grotesk text-sm sm:text-base md:text-lg text-white/85 mt-0.5 sm:mt-1 truncate" data-stagger>
+                ${student.project}
+              </p>
+            </div>
+
+            <!-- Meta row -->
+            <div class="pt-1.5 sm:pt-2 border-t border-white/10 flex flex-col gap-1 sm:gap-1.5" data-stagger>
+              <div class="flex gap-1.5 sm:gap-2 flex-wrap">
+                <span class="text-[10px] sm:text-sm font-mono uppercase tracking-wider px-2 sm:px-3 py-0.5 sm:py-1.5 bg-orange-500 text-black rounded font-bold">Year ${student.year}</span>
+                <span class="text-[10px] sm:text-sm font-mono uppercase tracking-wider px-2 sm:px-3 py-0.5 sm:py-1.5 bg-white/10 border border-white/15 rounded">${student.stack}</span>
+              </div>
+              <span class="font-mono text-[8px] sm:text-[9px] text-neutral-500 tracking-widest truncate">PROJECT #${student.slideNum} · CARD ${student.cardId || "—"}</span>
+            </div>
+          </div>
+
+          <!-- Right: QR — compact chip on mobile, large block on desktop -->
+          <div class="bg-white p-1 sm:p-2 rounded-md shrink-0 flex flex-col items-center justify-center self-center w-20 sm:w-auto h-20 sm:h-[70%] aspect-square shadow-[0_4px_18px_rgba(0,0,0,0.5)]" data-stagger>
+            <div class="qr-grid" data-qr="${student.id}" style="height: 100%; width: auto;"></div>
+            <div class="hidden sm:block text-black text-[10px] font-mono font-bold text-center mt-1 tracking-wider">SCAN</div>
+          </div>
+        </div>
+      `;
+
+        return section;
+      }
+
+      // Render all slides (300 is fine — they're lightweight when not scrolled into view)
+      function renderAllSlides() {
+        slider.innerHTML = "";
+        students.forEach((student, idx) => {
+          slider.appendChild(buildSlide(student, idx));
+        });
+        // Generate QR codes
+        slider.querySelectorAll("[data-qr]").forEach((el) => {
+          generateQR(el.dataset.qr, el);
+        });
+      }
+
+      // ============= AUTO-ADVANCE =============
+      const SLIDE_DURATION = 8000; // 8 seconds per student
+
+      function advance() {
+        currentIndex = (currentIndex + 1) % TOTAL_STUDENTS;
+        goToSlide(currentIndex);
+      }
+
+      // Register GSAP plugins
+      gsap.registerPlugin(SplitText, Flip);
+      let prevActiveIdx = 0;
+
+      function goToSlide(idx) {
+        const target = document.getElementById(`slide-${idx}`);
+        if (!target) return;
+        // Tween scrollLeft in sync with scale/tilt animation — no native
+        // scroll-snap, so the browser never jerks the card after the fact.
+        const targetScrollLeft =
+          target.offsetLeft + target.offsetWidth / 2 - slider.clientWidth / 2;
+        const scrollObj = { x: slider.scrollLeft };
+        gsap.to(scrollObj, {
+          x: targetScrollLeft,
+          duration: 1.0,
+          ease: "power3.out",
+          overwrite: "auto",
+          onUpdate() {
+            slider.scrollLeft = scrollObj.x;
+          },
+        });
+        updateSlideScales(idx);
+        animateActiveSlide(idx);
+        prevActiveIdx = idx;
+      }
+
+      // ============= GSAP COVERFLOW (scale + 3D tilt) =============
+      function updateSlideScales(activeIdx) {
+        const propsByDistance = (signed) => {
+          const d = Math.abs(signed);
+          if (d === 0) return { scale: 1, opacity: 1, rotationY: 0, z: 0 };
+          if (d === 1)
+            return {
+              scale: 0.72,
+              opacity: 0.65,
+              rotationY: signed < 0 ? 22 : -22,
+              z: -120,
+            };
+          return {
+            scale: 0.52,
+            opacity: 0.25,
+            rotationY: signed < 0 ? 30 : -30,
+            z: -240,
+          };
+        };
+        const range = 2;
+        // Hide every slide outside the visible window so the browser
+        // doesn't waste cycles compositing 300 transformed cards/iframes.
+        for (let i = 0; i < TOTAL_STUDENTS; i++) {
+          const el = document.getElementById(`slide-${i}`);
+          if (!el) continue;
+          const dist = Math.abs(i - activeIdx);
+          if (dist > range) {
+            el.style.visibility = "hidden";
+            el.style.opacity = "0";
+            continue;
+          }
+          el.style.visibility = "visible";
+          gsap.to(el, {
+            ...propsByDistance(i - activeIdx),
+            duration: 0.9,
+            ease: "power3.out",
+            overwrite: "auto",
+            force3D: true,
+          });
+        }
+      }
+
+      // ============= ACTIVE-SLIDE ANIMATIONS =============
+      // Stagger entrance, SplitText name, counter ticker, progress bar,
+      // bg parallax, and Flip-driven info panel reveal.
+      const splitTextCache = new WeakMap();
+      function animateActiveSlide(idx) {
+        const slide = document.getElementById(`slide-${idx}`);
+        if (!slide) return;
+
+        // --- Stagger entrance of [data-stagger] items ---
+        const items = slide.querySelectorAll("[data-stagger]");
+        gsap.fromTo(
+          items,
+          { y: 24, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.7,
+            ease: "expo.out",
+            stagger: 0.06,
+            overwrite: "auto",
+            force3D: true,
+          },
+        );
+
+        // --- SplitText reveal on student name ---
+        const nameEl = slide.querySelector("[data-name]");
+        if (nameEl) {
+          const cached = splitTextCache.get(nameEl);
+          if (cached) cached.revert();
+          const split = new SplitText(nameEl, { type: "chars" });
+          splitTextCache.set(nameEl, split);
+          gsap.from(split.chars, {
+            yPercent: 110,
+            opacity: 0,
+            rotateX: -90,
+            duration: 0.8,
+            ease: "expo.out",
+            stagger: 0.025,
+            delay: 0.15,
+          });
+        }
+
+        // --- Number ticker for [04/300] counter ---
+        const counter = slide.querySelector("[data-counter]");
+        if (counter) {
+          const targetVal = idx + 1;
+          const fromVal = prevActiveIdx + 1;
+          const obj = { v: fromVal };
+          gsap.to(obj, {
+            v: targetVal,
+            duration: 0.7,
+            ease: "power2.out",
+            onUpdate() {
+              counter.textContent = String(Math.round(obj.v)).padStart(2, "0");
+            },
+          });
+        }
+
+        // --- Progress bar via GSAP (replaces CSS keyframe) ---
+        const bar = slide.querySelector("[data-progress]");
+        if (bar) {
+          gsap.killTweensOf(bar);
+          gsap.fromTo(
+            bar,
+            { scaleX: 0 },
+            {
+              scaleX: 1,
+              duration: SLIDE_DURATION / 1000,
+              ease: "none",
+            },
+          );
+        }
+
+        // --- Background screenshot parallax (transform only, no scale
+        //     so the iframe doesn't trigger costly relayout each frame) ---
+        const bg = slide.querySelector(".site-bg-inner");
+        if (bg) {
+          gsap.killTweensOf(bg);
+          const slideH = slide.offsetHeight || 1;
+          const travel = Math.max(0, bg.offsetHeight - slideH);
+          gsap.fromTo(
+            bg,
+            { y: 0 },
+            {
+              y: -travel,
+              duration: (SLIDE_DURATION / 1000) * 0.95,
+              ease: "none",
+              force3D: true,
+            },
+          );
+        }
+
+        // --- Info panel reveal ---
+        const panel = slide.querySelector("[data-info-panel]");
+        if (panel) {
+          gsap.fromTo(
+            panel,
+            { y: 30, opacity: 0.3 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.9,
+              ease: "power3.out",
+              overwrite: "auto",
+            },
+          );
+        }
+      }
+
+      // ============= AUTO-ADVANCE CONTROL =============
+      let autoAdvanceTimer = null;
+      function startAutoAdvance() {
+        stopAutoAdvance();
+        autoAdvanceTimer = setInterval(advance, SLIDE_DURATION);
+      }
+      function stopAutoAdvance() {
+        if (autoAdvanceTimer) clearInterval(autoAdvanceTimer);
+        autoAdvanceTimer = null;
+      }
+      let resumeTimeout = null;
+      function pauseAutoAdvance(ms) {
+        stopAutoAdvance();
+        if (resumeTimeout) clearTimeout(resumeTimeout);
+        resumeTimeout = setTimeout(startAutoAdvance, ms);
+      }
+
+      // ============= TOAST =============
+      const toastEl = document.getElementById("toast");
+      const toastTextEl = document.getElementById("toast-text");
+      let toastTimer = null;
+      function showToast(text, variant) {
+        toastTextEl.textContent = text;
+        toastEl.style.borderColor =
+          variant === "error" ? "rgba(239,68,68,0.6)" : "rgba(249,115,22,0.5)";
+        toastEl.style.color = variant === "error" ? "#fca5a5" : "#fff";
+        gsap.killTweensOf(toastEl);
+        gsap.fromTo(
+          toastEl,
+          { y: -10, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.35, ease: "power3.out" },
+        );
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          gsap.to(toastEl, {
+            y: -10,
+            opacity: 0,
+            duration: 0.35,
+            ease: "power3.in",
+          });
+        }, 3500);
+      }
+
+      // ============= SCAN / SEARCH =============
+      const SCAN_PAUSE_MS = 30000;
+      const scanDot = document.getElementById("scan-dot");
+      function flashScanDot(color) {
+        scanDot.style.background = color;
+        scanDot.style.boxShadow = `0 0 8px ${color}`;
+        setTimeout(() => {
+          scanDot.style.background = "#525252";
+          scanDot.style.boxShadow = "none";
+        }, 1500);
+      }
+
+      // Look up by cardId (exact), then studentId (exact, case-insensitive),
+      // then by name (case-insensitive contains). Returns index or -1.
+      function findStudent(query) {
+        const q = String(query || "").trim();
+        if (!q) return -1;
+        if (cardIdToIndex.has(q)) return cardIdToIndex.get(q);
+        const lower = q.toLowerCase();
+        if (studentIdToIndex.has(lower)) return studentIdToIndex.get(lower);
+        return students.findIndex(
+          (s) => s.name && s.name.toLowerCase().includes(lower),
+        );
+      }
+
+      function handleScan(rawValue) {
+        const value = String(rawValue || "").trim();
+        if (!value) return;
+        const idx = findStudent(value);
+        if (idx === -1) {
+          showToast(`Card not recognized · ${value}`, "error");
+          flashScanDot("#ef4444");
+          return;
+        }
+        const s = students[idx];
+        currentIndex = idx;
+        goToSlide(idx);
+        pauseAutoAdvance(SCAN_PAUSE_MS);
+        showToast(`Scanned · ${s.name}`, "ok");
+        flashScanDot("#f97316");
+        // Highlight pulse on the active card
+        const slideEl = document.getElementById(`slide-${idx}`);
+        if (slideEl) {
+          gsap.fromTo(
+            slideEl,
+            { scale: 1 },
+            {
+              scale: 1.04,
+              duration: 0.2,
+              ease: "power2.out",
+              yoyo: true,
+              repeat: 1,
+              overwrite: false,
+            },
+          );
+        }
+      }
+
+      function wireScanInputs() {
+        const search = document.getElementById("search-input");
+
+        // Keep the visible search input focused so scanner keystrokes land here
+        // and the scanned value is visible to the user.
+        const refocus = () => {
+          if (document.activeElement !== search) search.focus();
+        };
+        refocus();
+        document.addEventListener("click", refocus);
+        search.addEventListener("blur", () => setTimeout(refocus, 0));
+
+        // Detect rapid keystroke bursts (typical of RFID/barcode scanners) so
+        // a scan auto-submits without waiting for Enter.
+        let lastKeyTime = 0;
+        let burstChars = 0;
+        const SCAN_BURST_GAP_MS = 50;
+        const SCAN_BURST_MIN = 4;
+        let autoSubmitTimer = null;
+
+        search.addEventListener("keydown", (e) => {
+          const now = performance.now();
+          if (e.key === "Enter") {
+            e.preventDefault();
+            clearTimeout(autoSubmitTimer);
+            const v = search.value;
+            handleScan(v);
+            search.value = "";
+            burstChars = 0;
+            return;
+          }
+          if (e.key.length === 1) {
+            if (now - lastKeyTime < SCAN_BURST_GAP_MS) burstChars++;
+            else burstChars = 1;
+            lastKeyTime = now;
+
+            // If we've seen a fast burst, schedule an auto-submit shortly after
+            // the last keystroke (covers scanners that don't append Enter).
+            clearTimeout(autoSubmitTimer);
+            if (burstChars >= SCAN_BURST_MIN) {
+              autoSubmitTimer = setTimeout(() => {
+                const v = search.value;
+                if (!v) return;
+                handleScan(v);
+                search.value = "";
+                burstChars = 0;
+              }, 120);
+            }
+          }
+        });
+
+        // Live search as the user types (manual lookup), debounced.
+        let liveTimer = null;
+        search.addEventListener("input", () => {
+          clearTimeout(liveTimer);
+          const v = search.value.trim();
+          if (!v) return;
+          liveTimer = setTimeout(() => {
+            // Skip if an auto-submit burst is pending.
+            if (autoSubmitTimer) return;
+            const idx = findStudent(v);
+            if (idx !== -1) {
+              currentIndex = idx;
+              goToSlide(idx);
+              pauseAutoAdvance(SCAN_PAUSE_MS);
+            }
+          }, 250);
+        });
+      }
+
+      // ============= INIT =============
+      (async function init() {
+        await loadStudents();
+        if (TOTAL_STUDENTS === 0) return;
+        renderAllSlides();
+        gsap.set("[id^='slide-']", {
+          scale: 0.4,
+          opacity: 0,
+          rotationY: 0,
+          transformPerspective: 2000,
+        });
+        updateSlideScales(0);
+        animateActiveSlide(0);
+        startAutoAdvance();
+        wireScanInputs();
+      })();
+
+      // Arrow key navigation
+      document.addEventListener("keydown", (e) => {
+        if (!TOTAL_STUDENTS) return;
+        // Don't hijack arrows when the user is typing in the search box
+        if (document.activeElement?.id === "search-input") return;
+        if (e.key === "ArrowRight") {
+          currentIndex = (currentIndex + 1) % TOTAL_STUDENTS;
+          goToSlide(currentIndex);
+        } else if (e.key === "ArrowLeft") {
+          currentIndex = (currentIndex - 1 + TOTAL_STUDENTS) % TOTAL_STUDENTS;
+          goToSlide(currentIndex);
+        }
+      });
+
+      // Touch swipe navigation (mobile)
+      let touchStartX = 0;
+      let touchStartY = 0;
+      slider.addEventListener(
+        "touchstart",
+        (e) => {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        },
+        { passive: true },
+      );
+      slider.addEventListener(
+        "touchend",
+        (e) => {
+          if (!TOTAL_STUDENTS) return;
+          const dx = e.changedTouches[0].clientX - touchStartX;
+          const dy = e.changedTouches[0].clientY - touchStartY;
+          if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
+          if (dx < 0) {
+            currentIndex = (currentIndex + 1) % TOTAL_STUDENTS;
+          } else {
+            currentIndex = (currentIndex - 1 + TOTAL_STUDENTS) % TOTAL_STUDENTS;
+          }
+          goToSlide(currentIndex);
+          pauseAutoAdvance(SCAN_PAUSE_MS);
+        },
+        { passive: true },
+      );
+    </script>
+  </body>
+</html>
