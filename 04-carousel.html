@@ -67,31 +67,25 @@
         inset: 0;
         overflow: hidden;
       }
-      /* Force desktop rendering of preview, then scale to fit card width.
-         Scale = cardWidth / 1440 (iframe's intrinsic render width). */
       .site-bg-inner {
-        --card-w: min(85vw, 460px);
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
-        height: calc(var(--card-w) * 3500 / 1440);
+        /* Height = scaled iframe content height (3500 * 0.4167 ≈ 1458). */
+        height: 1458px;
         background-size: 100% auto;
         background-position: top center;
         background-repeat: no-repeat;
       }
+      /* Force desktop rendering of preview, then scale to fit card width. */
       .site-bg-inner iframe {
         width: 1440px;
         height: 3500px;
         border: 0;
         transform-origin: top left;
-        transform: scale(calc(var(--card-w) / 1440px));
+        transform: scale(0.4167);
         pointer-events: none;
-      }
-      @media (min-width: 768px) {
-        .site-bg-inner {
-          --card-w: 640px;
-        }
       }
 
       /* Card content overlay gradient */
@@ -147,81 +141,66 @@
       .qr-grid div.white {
         background: #fff;
       }
-
-      /* ============= RESPONSIVE LAYOUT ============= */
-      .slide-container {
-        width: min(85vw, 460px);
-        height: calc(100vh - 90px);
-      }
-      #slider {
-        padding-inline: calc(50vw - min(42.5vw, 230px));
-      }
-      @media (min-width: 768px) {
-        .slide-container {
-          width: 640px;
-          height: calc(100vh - 110px);
-        }
-        #slider {
-          padding-inline: calc(50vw - 320px);
-        }
-      }
     </style>
   </head>
   <body
     class="min-h-screen flex flex-col items-center justify-center antialiased selection:bg-orange-500/30 text-white bg-black overflow-hidden"
   >
-    <!-- ============= FLOATING TOP-LEFT HEADER ============= -->
-    <div
-      class="fixed top-0 left-0 z-50 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4"
+    <!-- ============= FIXED NAVIGATION ============= -->
+    <nav
+      class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-black/80 backdrop-blur-md border-b border-white/10 h-16"
     >
-      <img src="logo 1.svg" alt="Oyunlag" class="h-9 sm:h-12 w-auto" />
-      <span
-        class="hidden sm:inline font-display text-lg font-semibold tracking-tight text-white font-geist"
-        >Oyunlag Demo Day '26</span
-      >
-    </div>
-
-    <!-- ============= FLOATING TOP-RIGHT SEARCH ============= -->
-    <div
-      class="fixed top-0 right-0 z-50 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4"
-    >
-      <div class="relative w-44 sm:w-64">
-        <input
-          id="search-input"
-          type="text"
-          inputmode="search"
-          placeholder="Search name, ID, or scan…"
-          autocomplete="off"
-          spellcheck="false"
-          class="w-full bg-black/60 backdrop-blur-md border border-white/10 rounded-full pl-9 pr-3 py-2 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-orange-500/50 focus:bg-white/10 transition font-mono"
-        />
-        <svg
-          class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <circle cx="11" cy="11" r="7" />
-          <line x1="20" y1="20" x2="16.65" y2="16.65" />
-        </svg>
-      </div>
-      <div
-        id="scan-status"
-        class="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-neutral-500 uppercase tracking-widest"
-      >
+      <div class="flex items-center gap-2 w-1/3">
         <span
-          id="scan-dot"
-          class="w-1.5 h-1.5 rounded-full bg-neutral-600"
-        ></span>
-        <span>RFID</span>
+          class="font-display text-sm font-semibold tracking-tight text-white font-geist"
+          >Oyunlag Demo Day '26</span
+        >
       </div>
-    </div>
 
-<!-- Scan toast -->
+      <div
+        id="pagination-dots"
+        class="flex items-center justify-center gap-2 w-1/3"
+      ></div>
+
+      <div class="w-1/3 flex items-center justify-end gap-3">
+        <div class="relative w-64">
+          <input
+            id="search-input"
+            type="text"
+            inputmode="search"
+            placeholder="Search name or scan card…"
+            autocomplete="off"
+            spellcheck="false"
+            class="w-full bg-white/5 border border-white/10 rounded-full pl-9 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-orange-500/50 focus:bg-white/10 transition font-mono"
+          />
+          <svg
+            class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <line x1="20" y1="20" x2="16.65" y2="16.65" />
+          </svg>
+        </div>
+        <div
+          id="scan-status"
+          class="flex items-center gap-1.5 text-[10px] font-mono text-neutral-500 uppercase tracking-widest"
+        >
+          <span
+            id="scan-dot"
+            class="w-1.5 h-1.5 rounded-full bg-neutral-600"
+          ></span>
+          <span>RFID</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Scan toast -->
     <div
       id="toast"
-      class="fixed top-16 sm:top-20 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-full backdrop-blur-md bg-black/85 border border-white/10 text-sm font-mono tracking-wider shadow-2xl pointer-events-none opacity-0"
+      class="fixed top-20 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-full backdrop-blur-md bg-black/85 border border-white/10 text-sm font-mono tracking-wider shadow-2xl pointer-events-none opacity-0"
     >
       <span id="toast-text"></span>
     </div>
@@ -229,7 +208,7 @@
     <!-- ============= CAROUSEL ============= -->
     <main
       id="slider"
-      class="flex flex-row overflow-x-hidden hide-scrollbar w-full pt-14 sm:pt-16 pb-4 sm:pb-8 gap-x-4 md:gap-x-12"
+      class="flex flex-row overflow-x-hidden hide-scrollbar w-full pt-20 pb-10 gap-x-12"
       style="
         mask-image: linear-gradient(
           90deg,
@@ -248,24 +227,22 @@
         height: 100vh;
         perspective: 2000px;
         transform-style: preserve-3d;
+        padding-inline: calc(50vw - 300px);
       "
     ></main>
 
     <!-- ============= BOTTOM BAR ============= -->
     <div
-      class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-6 py-2 sm:py-3 bg-black/80 backdrop-blur-md border-t border-white/10 h-10 sm:h-14"
+      class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 bg-black/80 backdrop-blur-md border-t border-white/10 h-14"
     >
       <div
-        class="font-mono text-[9px] sm:text-[10px] text-neutral-500 uppercase tracking-widest truncate"
+        class="font-mono text-[10px] text-neutral-500 uppercase tracking-widest"
       >
-        <span class="text-orange-500 font-bold">●</span>
-        <span class="hidden sm:inline"
-          >Scan any QR code to explore the project</span
-        >
-        <span class="sm:hidden">Scan to explore</span>
+        <span class="text-orange-500 font-bold">●</span> Scan any QR code to
+        explore the project
       </div>
       <div
-        class="hidden sm:flex gap-6 font-mono text-[10px] text-neutral-500 uppercase tracking-widest"
+        class="flex gap-6 font-mono text-[10px] text-neutral-500 uppercase tracking-widest"
       >
         <span><span class="text-white font-bold">300</span> projects</span>
         <span><span class="text-white font-bold">24</span> classes</span>
@@ -415,7 +392,6 @@
       let TOTAL_STUDENTS = 0;
       let students = [];
       const cardIdToIndex = new Map();
-      const studentIdToIndex = new Map();
 
       async function loadStudents() {
         let raw;
@@ -441,7 +417,6 @@
           const proj = projects[i % projects.length];
           return {
             id: s.id,
-            studentId: s.studentId,
             cardId: s.cardId,
             slideNum: String(i + 1).padStart(3, "0"),
             totalSlides: String(raw.length).padStart(3, "0"),
@@ -458,10 +433,8 @@
         TOTAL_STUDENTS = students.length;
 
         cardIdToIndex.clear();
-        studentIdToIndex.clear();
         students.forEach((s, i) => {
           if (s.cardId) cardIdToIndex.set(String(s.cardId).trim(), i);
-          if (s.studentId) studentIdToIndex.set(String(s.studentId).trim().toLowerCase(), i);
         });
       }
 
@@ -609,7 +582,7 @@
           } else if (inCorner) {
             cell.classList.add("white");
           } else {
-            const hash = Math.abs(((seedNum * 31 + i * 7) ^ (i * i)) % 100);
+            const hash = ((seedNum * 31 + i * 7) ^ (i * i)) % 100;
             if (hash > 48) cell.classList.add("white");
           }
           container.appendChild(cell);
@@ -620,14 +593,16 @@
       // Only render a window of slides at a time for performance (10 around current)
       const VISIBLE_WINDOW = 10;
       const slider = document.getElementById("slider");
+      const dotsContainer = document.getElementById("pagination-dots");
       let currentIndex = 0;
 
       function buildSlide(student, index) {
         const section = document.createElement("section");
         section.className =
-          "slide-container flex-shrink-0 flex flex-col overflow-hidden group bg-[#0A0A0A] border-white/10 border relative shadow-2xl rounded-2xl origin-center will-change-transform";
+          "slide-container flex-shrink-0 flex flex-col overflow-hidden group bg-[#0A0A0A] w-[500px] md:w-[600px] border-white/10 border relative shadow-2xl rounded-2xl origin-center will-change-transform";
         section.id = `slide-${index}`;
         section.dataset.index = index;
+        section.style.height = "calc(100vh - 140px)";
 
         section.innerHTML = `
         <!-- Site screenshot background (scrolling) — live example.html preview -->
@@ -648,55 +623,85 @@
         </div>
 
         <!-- Top header overlay -->
-        <header class="absolute top-0 left-0 right-0 z-20 flex items-start justify-between p-4 sm:p-8">
-          <span class="font-mono text-[9px] sm:text-xs text-neutral-200 uppercase tracking-widest bg-black/45 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10" data-stagger>
+        <header class="absolute top-0 left-0 right-0 z-20 flex items-start justify-between p-8">
+          <span class="font-mono text-xs text-neutral-400 uppercase tracking-widest" data-stagger>
             [<span data-counter>${student.slideNum}</span>/${student.totalSlides}] // ${student.stack.toUpperCase()}
           </span>
         </header>
 
-        <!-- Bottom info panel -->
-        <div class="absolute bottom-0 left-0 right-0 z-20 h-[32%] sm:h-1/4 px-4 sm:px-6 py-3 sm:py-4 flex gap-3 sm:gap-4 items-stretch overflow-hidden" data-info-panel
+        <!-- Bottom info panel — 1/4 of card with transparent gradient -->
+        <div class="absolute bottom-0 left-0 right-0 z-20 h-1/4 px-6 py-4 flex gap-4 items-stretch overflow-hidden" data-info-panel
              style="background: linear-gradient(180deg, rgba(10,10,10,0) 0%, rgba(10,10,10,0.85) 18%, rgba(10,10,10,0.96) 50%, rgba(10,10,10,1) 100%);">
 
           <!-- Left: text content -->
           <div class="flex-1 min-w-0 flex flex-col justify-between">
             <div class="min-h-0">
               <!-- Project label -->
-              <div class="mb-0.5 sm:mb-1" data-stagger>
+              <div class="mb-1" data-stagger>
                 <span class="font-mono text-[9px] uppercase tracking-[0.3em] text-orange-500 font-bold">Now showing</span>
               </div>
 
               <!-- Student name -->
-              <h1 class="font-space-grotesk text-2xl sm:text-3xl md:text-4xl tracking-tighter leading-[0.95] font-semibold text-white break-words" data-name
+              <h1 class="font-space-grotesk text-3xl md:text-4xl tracking-tighter leading-[0.95] font-semibold text-white" data-name
                   style="text-shadow: 0 1px 2px rgba(0,0,0,1), 0 4px 14px rgba(0,0,0,0.95), 0 10px 44px rgba(0,0,0,0.85), 0 0 32px rgba(249,115,22,0.45);">
                 ${student.firstName} <span class="text-white/80">${student.lastName}</span>
               </h1>
 
               <!-- Project title -->
-              <p class="font-space-grotesk text-sm sm:text-base md:text-lg text-white/85 mt-0.5 sm:mt-1 truncate" data-stagger>
+              <p class="font-space-grotesk text-base md:text-lg text-white/90 mt-1" data-stagger>
                 ${student.project}
               </p>
             </div>
 
             <!-- Meta row -->
-            <div class="pt-1.5 sm:pt-2 border-t border-white/10 flex flex-col gap-1 sm:gap-1.5" data-stagger>
-              <div class="flex gap-1.5 sm:gap-2 flex-wrap">
-                <span class="text-[10px] sm:text-sm font-mono uppercase tracking-wider px-2 sm:px-3 py-0.5 sm:py-1.5 bg-orange-500 text-black rounded font-bold">Year ${student.year}</span>
-                <span class="text-[10px] sm:text-sm font-mono uppercase tracking-wider px-2 sm:px-3 py-0.5 sm:py-1.5 bg-white/10 border border-white/15 rounded">${student.stack}</span>
+            <div class="pt-2 border-t border-white/10 flex flex-col gap-1.5" data-stagger>
+              <div class="flex gap-2 flex-wrap">
+                <span class="text-sm font-mono uppercase tracking-wider px-3 py-1.5 bg-orange-500 text-black rounded font-bold">Year ${student.year}</span>
+                <span class="text-sm font-mono uppercase tracking-wider px-3 py-1.5 bg-white/10 border border-white/15 rounded">${student.stack}</span>
               </div>
-              <span class="font-mono text-[8px] sm:text-[9px] text-neutral-500 tracking-widest truncate">PROJECT #${student.slideNum} · CARD ${student.cardId || "—"}</span>
+              <span class="font-mono text-[9px] text-neutral-500 tracking-widest">PROJECT #${student.slideNum} · CARD ${student.cardId || "—"}</span>
             </div>
           </div>
 
-          <!-- Right: QR — compact chip on mobile, large block on desktop -->
-          <div class="bg-white p-1 sm:p-2 rounded-md shrink-0 flex flex-col items-center justify-center self-center w-20 sm:w-auto h-20 sm:h-[70%] aspect-square shadow-[0_4px_18px_rgba(0,0,0,0.5)]" data-stagger>
+          <!-- Right: QR — fills full panel height -->
+          <div class="bg-white p-2 rounded-md shrink-0 flex flex-col items-center justify-center self-center" data-stagger
+               style="aspect-ratio: 1; height: 70%;">
             <div class="qr-grid" data-qr="${student.id}" style="height: 100%; width: auto;"></div>
-            <div class="hidden sm:block text-black text-[10px] font-mono font-bold text-center mt-1 tracking-wider">SCAN</div>
+            <div class="text-black text-[10px] font-mono font-bold text-center mt-1 tracking-wider">SCAN</div>
           </div>
         </div>
       `;
 
         return section;
+      }
+
+      function buildPagination() {
+        // For 300 slides we don't show all dots — show 12 dots that represent ranges
+        dotsContainer.innerHTML = "";
+        const DOT_COUNT = 12;
+        for (let i = 0; i < DOT_COUNT; i++) {
+          const dot = document.createElement("div");
+          dot.className =
+            "w-1.5 h-1.5 rounded-full bg-white/20 transition-all duration-300";
+          dotsContainer.appendChild(dot);
+        }
+      }
+
+      function updateDots() {
+        const dots = dotsContainer.children;
+        const DOT_COUNT = dots.length;
+        const activeDot = Math.floor(
+          (currentIndex / TOTAL_STUDENTS) * DOT_COUNT,
+        );
+        Array.from(dots).forEach((dot, i) => {
+          if (i === activeDot) {
+            dot.className =
+              "w-6 h-1.5 rounded-full bg-white transition-all duration-300";
+          } else {
+            dot.className =
+              "w-1.5 h-1.5 rounded-full bg-white/20 transition-all duration-300";
+          }
+        });
       }
 
       // Render all slides (300 is fine — they're lightweight when not scrolled into view)
@@ -740,6 +745,7 @@
             slider.scrollLeft = scrollObj.x;
           },
         });
+        updateDots();
         updateSlideScales(idx);
         animateActiveSlide(idx);
         prevActiveIdx = idx;
@@ -951,14 +957,13 @@
         }, 1500);
       }
 
-      // Look up by cardId (exact), then studentId (exact, case-insensitive),
-      // then by name (case-insensitive contains). Returns index or -1.
+      // Look up by cardId (exact) first, then by name (case-insensitive
+      // contains). Returns index or -1.
       function findStudent(query) {
         const q = String(query || "").trim();
         if (!q) return -1;
         if (cardIdToIndex.has(q)) return cardIdToIndex.get(q);
         const lower = q.toLowerCase();
-        if (studentIdToIndex.has(lower)) return studentIdToIndex.get(lower);
         return students.findIndex(
           (s) => s.name && s.name.toLowerCase().includes(lower),
         );
@@ -1071,7 +1076,9 @@
       (async function init() {
         await loadStudents();
         if (TOTAL_STUDENTS === 0) return;
+        buildPagination();
         renderAllSlides();
+        updateDots();
         gsap.set("[id^='slide-']", {
           scale: 0.4,
           opacity: 0,
@@ -1097,35 +1104,6 @@
           goToSlide(currentIndex);
         }
       });
-
-      // Touch swipe navigation (mobile)
-      let touchStartX = 0;
-      let touchStartY = 0;
-      slider.addEventListener(
-        "touchstart",
-        (e) => {
-          touchStartX = e.touches[0].clientX;
-          touchStartY = e.touches[0].clientY;
-        },
-        { passive: true },
-      );
-      slider.addEventListener(
-        "touchend",
-        (e) => {
-          if (!TOTAL_STUDENTS) return;
-          const dx = e.changedTouches[0].clientX - touchStartX;
-          const dy = e.changedTouches[0].clientY - touchStartY;
-          if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
-          if (dx < 0) {
-            currentIndex = (currentIndex + 1) % TOTAL_STUDENTS;
-          } else {
-            currentIndex = (currentIndex - 1 + TOTAL_STUDENTS) % TOTAL_STUDENTS;
-          }
-          goToSlide(currentIndex);
-          pauseAutoAdvance(SCAN_PAUSE_MS);
-        },
-        { passive: true },
-      );
     </script>
   </body>
 </html>
