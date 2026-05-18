@@ -27,9 +27,21 @@ body {
   scrollbar-width: none;
 }
 
-/* Card sizing — larger for TV viewing */
+/* Card sizing — near-fullscreen on mobile, larger than before on desktop. */
+:root {
+  --card-w: 94vw;
+  --card-h: calc(100vh - 120px);
+}
+@media (min-width: 768px) {
+  :root {
+    --card-w: min(55vw, 780px);
+    --card-h: calc(100vh - 200px);
+  }
+}
+
 .slide-container {
-  aspect-ratio: 3/4;
+  width: var(--card-w);
+  height: var(--card-h);
   min-width: 0;
   will-change: transform, opacity;
   contain: layout paint;
@@ -53,7 +65,6 @@ body {
   overflow: hidden;
 }
 .site-bg-inner {
-  --card-w: min(85vw, 460px);
   position: absolute;
   top: 0;
   left: 0;
@@ -70,11 +81,6 @@ body {
   transform-origin: top left;
   transform: scale(calc(var(--card-w) / 1440px));
   pointer-events: none;
-}
-@media (min-width: 768px) {
-  .site-bg-inner {
-    --card-w: 640px;
-  }
 }
 
 .card-overlay {
@@ -129,20 +135,6 @@ body {
   background: #fff;
 }
 
-/* ============= RESPONSIVE LAYOUT ============= */
-.slide-container {
-  width: min(85vw, 460px);
-  height: calc(100vh - 160px);
-}
 #slider {
-  padding-inline: calc(50vw - min(42.5vw, 230px));
-}
-@media (min-width: 768px) {
-  .slide-container {
-    width: 640px;
-    height: calc(100vh - 290px);
-  }
-  #slider {
-    padding-inline: calc(50vw - 320px);
-  }
+  padding-inline: calc((100vw - var(--card-w)) / 2);
 }
