@@ -27,15 +27,15 @@ body {
   scrollbar-width: none;
 }
 
-/* Card sizing — near-fullscreen on mobile, larger than before on desktop. */
+/* Card sizing — full viewport, flush to top and bottom edges. */
 :root {
   --card-w: 94vw;
-  --card-h: calc(100vh - 120px);
+  --card-h: 100vh;
 }
 @media (min-width: 768px) {
   :root {
     --card-w: min(55vw, 780px);
-    --card-h: calc(100vh - 200px);
+    --card-h: 100vh;
   }
 }
 

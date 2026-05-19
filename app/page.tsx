@@ -795,16 +795,16 @@ export default function Home() {
   return (
     <>
       {/* ============= FLOATING TOP-LEFT HEADER ============= */}
-      <div className="fixed top-0 left-0 z-50 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4">
+      <div className="fixed top-3 sm:top-6 left-3 sm:left-6 z-50 flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-3 bg-black/60 backdrop-blur-md border border-white/10 rounded-full shadow-2xl">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo 1.svg" alt="Oyunlag" className="h-10 sm:h-20 w-auto" />
-        <span className="hidden sm:inline font-display text-2xl font-bold tracking-tight text-white font-geist">
+        <img src="/logo 1.svg" alt="Oyunlag" className="h-8 sm:h-12 w-auto" />
+        <span className="hidden sm:inline font-display text-xl font-bold tracking-tight text-white font-geist pr-2">
           Сурагчдын хийсэн бүтээл
         </span>
       </div>
 
       {/* ============= FLOATING SEARCH / RFID ============= */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-0 z-50 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4">
+      <div className="fixed top-3 sm:top-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 z-50 flex items-center gap-2 sm:gap-3">
         <div className="relative w-56 sm:w-96">
           <input
             ref={searchInputRef}
@@ -855,7 +855,7 @@ export default function Home() {
       <main
         ref={sliderRef}
         id="slider"
-        className="flex flex-row overflow-x-hidden hide-scrollbar w-full pt-16 sm:pt-28 pb-4 sm:pb-8 gap-x-4 md:gap-x-12"
+        className="flex flex-row overflow-x-hidden hide-scrollbar w-full pt-0 pb-0 gap-x-4 md:gap-x-12"
         style={{
           maskImage:
             "linear-gradient(90deg, transparent, black 8%, black 92%, transparent)",
@@ -877,27 +877,6 @@ export default function Home() {
         ))}
       </main>
 
-      {/* ============= BOTTOM BAR ============= */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-6 py-2 sm:py-3 bg-black/80 backdrop-blur-md border-t border-white/10 h-10 sm:h-14">
-        <div className="font-mono text-[9px] sm:text-[10px] text-neutral-500 uppercase tracking-widest truncate">
-          <span className="hidden sm:inline">
-            <span className="text-orange-500 font-bold">●</span> Scan any QR
-            code to explore the project
-          </span>
-        </div>
-        <div className="hidden sm:flex gap-6 font-mono text-[10px] text-neutral-500 uppercase tracking-widest">
-          <span>
-            <span className="text-white font-bold">{students.length}</span>{" "}
-            projects
-          </span>
-          <span>
-            <span className="text-white font-bold">24</span> classes
-          </span>
-          <span>
-            <span className="text-white font-bold">15</span> stacks
-          </span>
-        </div>
-      </div>
     </>
   );
 }
